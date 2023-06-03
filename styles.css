@@ -4,3 +4,9 @@
     flex-direction: column;
     gap: 4px;
 }
+
+button {
+    margin-top: 16px;
+    padding: 16px;
+    font-size: 16px;
+}

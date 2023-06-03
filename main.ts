@@ -62,31 +62,74 @@ class SampleModal extends Modal {
 	}
 
 	displayRandomLine() {
+		const self = this;
 		const { contentEl } = this;
 		contentEl.empty();
+
 		const lines = this.poem.split("\n");
 		// remove lines that are empty or only contain whitespace, or are ```
 		const filteredLines = lines.filter(
-			(line) => line.trim() !== "" && line.trim() !== "```" 
+			(line) => line.trim() !== "" && line.trim() !== "```"
 		);
 		const randomLine =
 			filteredLines[Math.floor(Math.random() * filteredLines.length)];
 		// get the line above
 		const lineAbove = lines[lines.indexOf(randomLine) - 1];
+
+		// get a random word from the randomLine, and replace it with an input (cloze deletion)
+		let words = randomLine.split(" ");
+		// exclude words that are shorter than 3 characters
+		words = words.filter((word) => word.length > 3);
+		console.log("Words:", words);
+
+		const randomWord = words[Math.floor(Math.random() * words.length)];
+
+		const firstPartOfClozeLine = randomLine.split(randomWord)[0];
+		const secondPartOfClozeLine = randomLine.split(randomWord)[1];
+
+		function revealAnswer() {
+			// delete content of cloze line
+			clozeLine.empty();
+			answerButtonWrapper.empty();
+			// display the whole line
+			clozeLine.createEl("span", {
+				text: randomLine,
+			});
+		
+			contentEl
+				.createEl("button", {
+					text: "Another line",
+				})
+				.addEventListener("click", () => {
+					self.displayRandomLine();
+				});
+		}
+
 		contentEl.createEl("div", {
 			text: lineAbove,
 		});
-		contentEl.createEl("div", {
-			text: randomLine,
+		const clozeLine = contentEl.createEl("div", {});
+
+		clozeLine.createEl("span", {
+			text: firstPartOfClozeLine,
 		});
-		
+		clozeLine.createEl("input", {
+			text: "",
+		});
+		clozeLine.createEl("span", {
+			text: secondPartOfClozeLine,
+		});
+
+		const answerButtonWrapper = contentEl.createEl("div", {});
+
 		// add a button to display another random line
-		const button = contentEl.createEl("button", {
-			text: "Another line",
-		});
-		button.addEventListener("click", () => {
-			this.displayRandomLine();
-		});
+		const checkAnswerButton = answerButtonWrapper
+			.createEl("button", {
+				text: "Check Answer",
+			})
+			.addEventListener("click", () => {
+				revealAnswer();
+			});
 	}
 
 	onOpen() {
