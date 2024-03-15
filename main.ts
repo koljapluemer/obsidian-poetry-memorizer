@@ -100,16 +100,23 @@ class SampleModal extends Modal {
 		const firstPartOfClozeLine = randomLine.split(randomWord)[0];
 		const secondPartOfClozeLine = randomLine.split(randomWord)[1];
 
-		function revealAnswer() {
+		function revealAnswer(randomWord: string) {
 			// delete content of cloze line
 			clozeLine.empty();
 			answerButtonWrapper.empty();
-			// display the whole line
-			clozeLine.createEl("span", {
-				text: randomLine,
-			});
-
+			// wrap the random word in bold and cursive tags
 			contentEl
+				.createEl("span", {
+					text: firstPartOfClozeLine,
+				})
+				.createEl("span", {
+					text: randomWord,
+					cls: "cloze-word",
+				})
+			contentEl
+				.createEl("span", {
+					text: secondPartOfClozeLine,
+				})
 				.createEl("button", {
 					text: "Practice next line",
 					cls: "plugin-button",
@@ -143,15 +150,13 @@ class SampleModal extends Modal {
 				cls: "plugin-button",
 			})
 			.addEventListener("click", () => {
-				revealAnswer();
+				revealAnswer(randomWord);
 			});
 	}
 
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.id = "poetry-memorizer";
-
-
 
 		// get currently open note
 		const activeLeaf = this.app.workspace.activeLeaf;
@@ -181,7 +186,9 @@ class SampleModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 		// remove #"poetry-memorizer-background"
-		const background = document.getElementById("poetry-memorizer-background");
+		const background = document.getElementById(
+			"poetry-memorizer-background"
+		);
 		if (background) {
 			background.remove();
 		}
