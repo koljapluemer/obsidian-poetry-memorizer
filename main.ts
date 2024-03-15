@@ -28,7 +28,7 @@ export default class MyPlugin extends Plugin {
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
 			"flower-2",
-			"Poetry Memorizer",
+			"Start poetry memorizer",
 			(evt: MouseEvent) => {
 				// Called when the user clicks the icon.
 				new SampleModal(this.app).open();
@@ -59,6 +59,20 @@ class SampleModal extends Modal {
 	constructor(app: App) {
 		super(app);
 		this.poem = ""; // Initialize the poem property
+
+		// create blurred background
+		const background = document.createElement("div");
+		background.style.position = "fixed";
+		background.style.top = "0";
+		background.style.left = "0";
+		background.style.width = "100%";
+		background.style.height = "100%";
+		background.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+		background.style.zIndex = "10";
+		background.style.backdropFilter = "blur(10px)";
+		// set id
+		background.id = "poetry-memorizer-background";
+		document.body.appendChild(background);
 	}
 
 	displayRandomLine() {
@@ -80,7 +94,6 @@ class SampleModal extends Modal {
 		let words = randomLine.split(" ");
 		// exclude words that are shorter than 3 characters
 		words = words.filter((word) => word.length > 3);
-		console.log("Words:", words);
 
 		const randomWord = words[Math.floor(Math.random() * words.length)];
 
@@ -95,10 +108,11 @@ class SampleModal extends Modal {
 			clozeLine.createEl("span", {
 				text: randomLine,
 			});
-		
+
 			contentEl
 				.createEl("button", {
-					text: "Another line",
+					text: "Practice next line",
+					cls: "plugin-button",
 				})
 				.addEventListener("click", () => {
 					self.displayRandomLine();
@@ -125,7 +139,8 @@ class SampleModal extends Modal {
 		// add a button to display another random line
 		const checkAnswerButton = answerButtonWrapper
 			.createEl("button", {
-				text: "Check Answer",
+				text: "Check answer",
+				cls: "plugin-button",
 			})
 			.addEventListener("click", () => {
 				revealAnswer();
@@ -136,20 +151,28 @@ class SampleModal extends Modal {
 		const { contentEl } = this;
 		contentEl.id = "poetry-memorizer";
 
+
+
 		// get currently open note
 		const activeLeaf = this.app.workspace.activeLeaf;
 		if (activeLeaf) {
-			const currentFile = activeLeaf.view?.file;
+			const currentFile = activeLeaf.view.file;
 			if (currentFile) {
-				console.log("Currently open note:", currentFile.path);
 				// get note content
 				this.app.vault.read(currentFile).then((content) => {
-					console.log("Note content:", content);
 					this.poem = content;
+					// remove frontmatter
+					const metadata =
+						app.metadataCache.getFileCache(currentFile);
+					if (metadata) {
+						console.log("found metadata", metadata);
+						this.poem = this.poem.split("---")[2];
+					}
+
 					this.displayRandomLine();
 				});
-			} else {
-				console.log("No note is currently open.");
+				// if there still is (---), only take the first part
+				this.poem = this.poem.split("---")[0];
 			}
 		}
 	}
@@ -157,5 +180,10 @@ class SampleModal extends Modal {
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
+		// remove #"poetry-memorizer-background"
+		const background = document.getElementById("poetry-memorizer-background");
+		if (background) {
+			background.remove();
+		}
 	}
 }

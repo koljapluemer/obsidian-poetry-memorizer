@@ -1,12 +1,10 @@
-
 #poetry-memorizer {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-button {
+.plugin-button {
     margin-top: 16px;
-    padding: 16px;
-    font-size: 16px;
 }
+
