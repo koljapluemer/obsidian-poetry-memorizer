@@ -6,3 +6,6 @@
 - refactor 1 function
 - think about accessibility strategies
 - think about SEO strategies
+
+
+- definitely need Vue or smth, manual HTML gen is no fun
